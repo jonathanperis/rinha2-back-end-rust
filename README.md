@@ -1,64 +1,71 @@
 # rinha2-back-end-rust
 
-High-performance backend implementation for the **Rinha de Backend** challenge (2nd Edition, 2024/Q1) — built with **Rust**, **Actix-web**, **PostgreSQL**, and **Nginx**.
+> Rust/Actix-web 4 implementation for the Rinha de Backend 2024/Q1 challenge with SQLx async driver and PostgreSQL stored procedures
 
-**Live results:** [jonathanperis.github.io/rinha2-back-end-rust](https://jonathanperis.github.io/rinha2-back-end-rust/)
+[![CI](https://github.com/jonathanperis/rinha2-back-end-rust/actions/workflows/build-check-webapi.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-rust/actions/workflows/build-check-webapi.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
 ## About
 
-A Rust implementation of the Brazilian backend programming challenge that pushes API performance to the absolute limit under strict resource constraints. The API manages fictional bank clients with credit/debit transactions and balance statements.
-
-### Endpoints
-
-- `POST /clientes/{id}/transacoes` — Create a transaction (credit or debit)
-- `GET /clientes/{id}/extrato` — Get client balance and recent transactions
-
-### Results
-
-All requests completed under 800ms using only **250MB of RAM** — 60% less than the challenge allows.
+A Rust implementation of the Brazilian backend challenge Rinha de Backend 2024/Q1, where a fictional bank API must handle concurrent transactions under strict resource constraints (1.5 CPU, 550MB RAM total). Built as a minimal single-file API (~140 lines) using Actix-web 4 with Tokio async runtime and SQLx 0.7 for compile-time checked PostgreSQL queries. Built for learning purposes.
 
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| Rust 1.85 | API implementation |
-| Actix-web 4 | HTTP framework |
-| SQLx 0.7 | Async PostgreSQL driver |
-| Tokio | Async runtime |
-| PostgreSQL | Database with stored procedures |
-| Nginx | Reverse proxy / load balancer |
-| Docker | Multi-stage build and orchestration |
-| Prometheus + Grafana | Observability |
-| k6 | Stress testing |
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| Rust | 1.85 | API implementation |
+| Actix-web | 4 | HTTP framework |
+| SQLx | 0.7 | Async PostgreSQL driver |
+| Tokio | - | Async runtime |
+| PostgreSQL | - | Database with stored procedures |
+| Nginx | 1.27 | Reverse proxy and load balancer (least-conn) |
+| Docker | - | Multi-stage build and orchestration |
+| k6 | - | Stress testing |
 
-## Architecture
+## Features
 
-- **2 Rust API instances** behind Nginx (0.4 CPU, 100MB RAM each)
-- **1 PostgreSQL** database (0.5 CPU, 330MB RAM)
-- **1 Nginx** load balancer (0.2 CPU, 20MB RAM)
-- Business logic pushed into PostgreSQL stored procedures
-- Minimal single-file Rust API (~140 lines)
+- Minimal single-file API implementation (~140 lines of Rust)
+- Zero-cost async with Tokio runtime and Actix-web
+- SQLx 0.7 async PostgreSQL driver
+- PostgreSQL stored procedures for server-side business logic
+- PostgreSQL tuned with synchronous_commit=0, fsync=0, full_page_writes=0
+- All requests under 800ms at 250MB RAM usage (60% below limit)
 
 ## Getting Started
 
+### Prerequisites
+
+- Docker with Docker Compose
+
+### Quick Start
+
 ```bash
+git clone https://github.com/jonathanperis/rinha2-back-end-rust.git
+cd rinha2-back-end-rust
 docker compose up nginx -d --build
 ```
 
-The API will be available at `http://localhost:9999`.
+API available at `http://localhost:9999`
 
-## Stress Tests
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/clientes/{id}/transacoes` | POST | Submit debit or credit transaction |
+| `/clientes/{id}/extrato` | GET | Get account balance statement |
 
-- [rinha2-back-end-k6](https://github.com/jonathanperis/rinha2-back-end-k6) — Grafana k6 stress test suite used across all implementations
+## Project Structure
 
-## Other Implementations
+```
+rinha2-back-end-rust/
+├── src/WebApi/         — API implementation
+├── docker-compose.yml  — Full stack: API x2, Nginx, PostgreSQL, k6, observability
+└── .github/workflows/  — CI/CD pipelines
+```
 
-- [rinha2-back-end-dotnet](https://github.com/jonathanperis/rinha2-back-end-dotnet) — C# / .NET ![Perfect Score](https://img.shields.io/badge/⭐_Perfect_Score-gold?style=flat-square)
-- [rinha2-back-end-go](https://github.com/jonathanperis/rinha2-back-end-go) — Go ![Learning Purposes](https://img.shields.io/badge/📚_Learning_Purposes-blue?style=flat-square)
-- [rinha2-back-end-python](https://github.com/jonathanperis/rinha2-back-end-python) — Python ![Learning Purposes](https://img.shields.io/badge/📚_Learning_Purposes-blue?style=flat-square)
+## CI/CD
+
+Two GitHub Actions workflows: `build-check-webapi.yml` runs on pull requests to build and health-check the API, and `main-release-webapi.yml` runs on the main branch to build a multi-platform Docker image and push it to GHCR.
 
 ## License
 
-Licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE)
