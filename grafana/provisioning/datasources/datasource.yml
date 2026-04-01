@@ -20,7 +20,7 @@ datasources:
     url: http://influxdb:8086
     isDefault: true    
     secureJsonData:
-      token: EEKpryGZk8pVDXmIuy484BKUxM5jOEDv7YNoeNZUbsNbpbPbP6kK_qY9Zsyw7zNnlZ7pHG16FYzNaqwLMBUz8g==
+      token: ${INFLUXDB_TOKEN}
     jsonData:
       version: Flux
       organization: rinha

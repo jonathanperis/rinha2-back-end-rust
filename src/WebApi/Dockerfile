@@ -21,8 +21,15 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y ca-certificates libssl3 && rm -rf /var/lib/apt/lists/*
 
+# Create a non-root user to run the application.
+RUN groupadd -r app && useradd -r -g app app
+
 # Copy the built binary from the builder stage.
 COPY --from=builder /app/target/release/rinha2-back-end-rust /usr/local/bin/app
+
+RUN chown app:app /usr/local/bin/app
+
+USER app
 
 EXPOSE 8080
 
