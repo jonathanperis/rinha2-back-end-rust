@@ -10,11 +10,14 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  IMAGE: ghcr.io/jonathanperis/rinha2-back-end-rust
+
 jobs:
   setup-build-test:
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest
 
-    steps:      
+    steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
         with:
@@ -30,9 +33,11 @@ jobs:
       - name: Build the application
         run: cargo build --release --manifest-path ./src/WebApi/Cargo.toml
 
-  build-push-image:
+  build-push-amd64:
     needs: setup-build-test
     runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
 
     steps:
       - name: Checkout Repository
@@ -53,17 +58,71 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Docker Image (amd64)
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: ./src/WebApi
           file: ./src/WebApi/Dockerfile
           push: true
-          tags: ghcr.io/jonathanperis/rinha2-back-end-rust:latest
-          platforms: linux/amd64,linux/arm64/v8
-          
+          tags: ${{ env.IMAGE }}:latest
+          platforms: linux/amd64
+
+  build-push-arm64:
+    needs: build-push-amd64
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image (arm64)
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: ./src/WebApi
+          file: ./src/WebApi/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}:latest-arm64
+          platforms: linux/arm64/v8
+
+  merge-manifest:
+    needs: [build-push-amd64, build-push-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge into multi-arch manifest
+        run: |
+          docker buildx imagetools create \
+            --tag ${{ env.IMAGE }}:latest \
+            ${{ env.IMAGE }}@${{ needs.build-push-amd64.outputs.digest }} \
+            ${{ env.IMAGE }}@${{ needs.build-push-arm64.outputs.digest }}
+
   container-test:
-    needs: build-push-image
+    needs: build-push-amd64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -102,7 +161,7 @@ jobs:
 
       - name: Build and Run Docker Compose for Load Test
         run: |
-          docker compose -f ./prod/docker-compose.yml up k6 --build --force-recreate 
+          docker compose -f ./prod/docker-compose.yml up k6 --build --force-recreate
           sleep 10
 
       # - name: Listing Files recursively
