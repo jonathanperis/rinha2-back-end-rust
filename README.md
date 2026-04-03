@@ -110,7 +110,7 @@ rinha2-back-end-rust/
 | Build Check | Pull requests | Cargo build (release) + Docker health check |
 | Main Release | Push to main | Build + Multi-platform Docker push (amd64/arm64) to GHCR + k6 load test + GitHub Pages report |
 | CodeQL | Push/PR + weekly | Security and quality analysis for Rust |
-| Deploy Docs | Push to main | Generate and deploy documentation to GitHub Pages |
+| Deploy | Push to main | Deploy documentation to GitHub Pages |
 
 **Docker image:** `ghcr.io/jonathanperis/rinha2-back-end-rust:latest`
 
