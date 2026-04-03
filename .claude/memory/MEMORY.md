@@ -1,0 +1,1 @@
+- [Architecture](architecture.md) — Single-file Actix-web design, SQLx offline mode, lazy static clients, shared infra across rinha repos
