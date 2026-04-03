@@ -64,6 +64,17 @@ NGINX (:9999, least_conn)
 
 ---
 
+## Observability (Dev Stack)
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| Prometheus | 9090 | Metrics collection |
+| Grafana | 3000 | Dashboards (PostgreSQL, k6, performance) |
+| InfluxDB | 8086 | k6 time-series metrics |
+| postgres-exporter | 9187 | PostgreSQL metrics for Prometheus |
+
+---
+
 ## Project Structure
 
 ```
@@ -87,6 +98,8 @@ rinha2-back-end-rust/
 
 - **PR:** Cargo build (release) + Docker health check
 - **Main:** Build + Multi-platform Docker push (amd64/arm64) to GHCR + k6 load test + GitHub Pages report
+- **CodeQL:** Security and quality analysis (push/PR + weekly schedule)
+- **Deploy Docs:** Generate and deploy documentation to GitHub Pages
 - **Image:** `ghcr.io/jonathanperis/rinha2-back-end-rust:latest`
 
 ---
@@ -99,3 +112,18 @@ rinha2-back-end-rust/
 | PostgreSQL | 0.5 | 330MB |
 | NGINX | 0.2 | 20MB |
 | **Total** | **1.5** | **550MB** |
+
+---
+
+## Development Workflow
+
+- All changes must go through a **branch + pull request** workflow — never push directly to main
+- PRs use **rebase merge only** (squash and merge commits are disabled)
+- Use `gh` CLI for all GitHub operations (PRs, issues, releases, checks)
+- Repo-wide community files (CODE_OF_CONDUCT, CONTRIBUTING, FUNDING, etc.) live in the **jonathanperis/.github** repo — do not duplicate them here
+
+## Shared Infrastructure
+
+This repo shares PostgreSQL schema, stored procedures, NGINX config, and resource constraints with sibling implementations (Go, .NET, Python). The k6 test suite is the same across all (`ghcr.io/jonathanperis/rinha2-back-end-k6:latest`).
+
+Changes to `docker-entrypoint-initdb.d/rinha.dump.sql` or `nginx.conf` should be mirrored across all rinha repos.
