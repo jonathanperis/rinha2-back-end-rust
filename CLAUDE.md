@@ -118,6 +118,7 @@ rinha2-back-end-rust/
 ## Development Workflow
 
 - All changes must go through a **branch + pull request** workflow — never push directly to main
+- Always **sync main before creating a branch** (`git checkout main && git fetch origin main && git pull origin main`) and **fetch main again before opening a PR** to avoid conflicts
 - PRs use **rebase merge only** (squash and merge commits are disabled)
 - Use `gh` CLI for all GitHub operations (PRs, issues, releases, checks)
 - Repo-wide community files (CODE_OF_CONDUCT, CONTRIBUTING, FUNDING, etc.) live in the **jonathanperis/.github** repo — do not duplicate them here
