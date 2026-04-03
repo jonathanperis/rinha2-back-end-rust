@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>rinha2-back-end-rust - Documentation</title>
-  <meta name="description" content="Rust 1.85 implementation of Rinha de Backend 2024/Q1 — minimal async API built for performance under constraints">
+  <meta name="description" content="Rust 1.94 implementation of Rinha de Backend 2024/Q1 — minimal async API built for performance under constraints">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -376,6 +376,13 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-KRMY47YNRG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-KRMY47YNRG');
+  </script>
 </head>
 <body>
 
@@ -395,7 +402,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1 class="repo-title">rinha2-back-end-rust</h1>
-      <p class="repo-description">Rust 1.85 implementation of Rinha de Backend 2024/Q1 — minimal async API built for performance under constraints</p>
+      <p class="repo-description">Rust 1.94 implementation of Rinha de Backend 2024/Q1 — minimal async API built for performance under constraints</p>
       <input type="text" id="searchInput" class="search-box" placeholder="Search documentation...">
     </div>
     <div class="sidebar-nav-container">
@@ -421,7 +428,6 @@
       
 <section id="home" class="doc-section">
   <h1 class="page-title">Home</h1>
-  <h1>rinha2-back-end-rust</h1>
 <p>Rust/Actix-web 4 implementation for the Rinha de Backend 2024/Q1 challenge. Manages a fictional bank API with transaction processing and balance statements under strict resource constraints (1.5 CPU, 550MB RAM total across all containers).</p>
 <h2>Wiki Pages</h2>
 <table>
@@ -455,7 +461,7 @@
 <h2>Key Features</h2>
 <ul>
 <li>Minimal single-file API implementation (~140 lines of Rust)</li>
-<li>Actix-web 4 with Tokio async runtime and SQLx 0.7</li>
+<li>Actix-web 4 with Tokio async runtime and SQLx 0.8</li>
 <li>PostgreSQL stored procedures for server-side business logic</li>
 <li>All requests under 800ms at 250MB RAM usage</li>
 </ul>
@@ -466,7 +472,6 @@
 
 <section id="architecture" class="doc-section">
   <h1 class="page-title">Architecture</h1>
-  <h1>Architecture</h1>
 <h2>Overview</h2>
 <p>The system follows a shared architecture across all Rinha de Backend implementations: two API instances behind an Nginx reverse proxy, with a single PostgreSQL database and an observability stack.</p>
 <h2>Services</h2>
@@ -481,13 +486,13 @@
 </thead>
 <tbody><tr>
 <td>webapi1</td>
-<td>Rust/Actix-web 4 API instance (SQLx 0.7 + Tokio)</td>
+<td>Rust/Actix-web 4 API instance (SQLx 0.8 + Tokio)</td>
 <td>0.4</td>
 <td>100MB</td>
 </tr>
 <tr>
 <td>webapi2</td>
-<td>Rust/Actix-web 4 API instance (SQLx 0.7 + Tokio)</td>
+<td>Rust/Actix-web 4 API instance (SQLx 0.8 + Tokio)</td>
 <td>0.4</td>
 <td>100MB</td>
 </tr>
@@ -529,7 +534,7 @@
 <ul>
 <li>Minimal single-file Rust API (~140 lines)</li>
 <li>Actix-web 4 HTTP framework with Tokio async runtime</li>
-<li>SQLx 0.7 async PostgreSQL driver</li>
+<li>SQLx 0.8 async PostgreSQL driver</li>
 <li>Multi-stage Docker build for minimal container image size</li>
 </ul>
 
@@ -537,7 +542,6 @@
 
 <section id="challenge" class="doc-section">
   <h1 class="page-title">Challenge</h1>
-  <h1>Challenge</h1>
 <h2>Rinha de Backend 2024/Q1</h2>
 <p>The Rinha de Backend is a Brazilian backend programming challenge. The 2024/Q1 edition simulates a fictional bank called &quot;Rinha Financeira&quot; that manages up to 5 named clients, each seeded at startup with a credit limit and initial balance.</p>
 <h2>Endpoints</h2>
@@ -574,28 +578,38 @@
 </section>
 
 <section id="ci-cd-pipeline" class="doc-section">
-  <h1 class="page-title">CI CD Pipeline</h1>
-  <h1>CI/CD Pipeline</h1>
+  <h1 class="page-title">CI/CD Pipeline</h1>
 <h2>Workflows</h2>
-<p>This repository uses two GitHub Actions workflows:</p>
-<h3>build-check-webapi.yml</h3>
+<p>This repository uses four GitHub Actions workflows:</p>
+<h3>build-check.yml</h3>
 <ul>
-<li><strong>Trigger:</strong> Pull requests</li>
-<li><strong>Steps:</strong> Builds the API container and runs a health check to verify the service starts correctly</li>
+<li><strong>Trigger:</strong> Pull requests to main</li>
+<li><strong>Steps:</strong> Builds the Rust release binary, then runs Docker Compose and validates the healthcheck endpoint</li>
 <li><strong>Purpose:</strong> Catch build failures and regressions before merging</li>
 </ul>
-<h3>main-release-webapi.yml</h3>
+<h3>main-release.yml</h3>
 <ul>
 <li><strong>Trigger:</strong> Push to main branch</li>
-<li><strong>Steps:</strong> Builds a multi-platform Docker image and pushes it to GitHub Container Registry (GHCR)</li>
-<li><strong>Purpose:</strong> Automated release of production-ready container images</li>
+<li><strong>Steps:</strong> Builds the release binary, builds and pushes a multi-platform Docker image (amd64/arm64) to GHCR, runs container healthcheck, then runs k6 load tests and uploads the stress test report as an artifact</li>
+<li><strong>Purpose:</strong> Automated release of production-ready container images with load test validation</li>
+</ul>
+<h3>codeql.yml</h3>
+<ul>
+<li><strong>Trigger:</strong> Push to main, pull requests to main, weekly schedule (Mondays)</li>
+<li><strong>Steps:</strong> Runs CodeQL static analysis for Rust with security-and-quality queries</li>
+<li><strong>Purpose:</strong> Continuous security and code quality analysis</li>
+</ul>
+<h3>deploy.yml</h3>
+<ul>
+<li><strong>Trigger:</strong> Push to main branch</li>
+<li><strong>Steps:</strong> Deploys the <code>docs/</code> directory to GitHub Pages using the actions/deploy-pages workflow</li>
+<li><strong>Purpose:</strong> Publish project documentation and stress test reports to GitHub Pages</li>
 </ul>
 
 </section>
 
 <section id="getting-started" class="doc-section">
   <h1 class="page-title">Getting Started</h1>
-  <h1>Getting Started</h1>
 <h2>Prerequisites</h2>
 <ul>
 <li>Docker with Docker Compose</li>
@@ -641,7 +655,6 @@ docker compose up nginx -d --build
 
 <section id="performance" class="doc-section">
   <h1 class="page-title">Performance</h1>
-  <h1>Performance</h1>
 <h2>Resource Constraints</h2>
 <p>The challenge allows a total of 1.5 CPU and 550MB RAM across all containers.</p>
 <h2>Actual Usage</h2>
