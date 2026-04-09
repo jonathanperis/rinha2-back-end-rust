@@ -69,7 +69,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: clip;
+  overflow: clip;
+  overscroll-behavior-y: none;
   position: relative;
 }
 
