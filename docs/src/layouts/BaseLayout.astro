@@ -11,7 +11,7 @@ const {
   description = 'High-performance banking API for the Rinha de Backend challenge. Built with Rust, Actix-web 4, and SQLx. ~140 lines under strict resource constraints (1.5 CPU, 550MB RAM).'
 } = Astro.props;
 
-const GA_ID = 'G-KRMY47YNRG';
+const GA_ID = import.meta.env.PUBLIC_GA_ID;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -35,6 +35,9 @@ const jsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <meta name="description" content={description} />
     <meta name="keywords" content="Rust, Actix-web, SQLx, PostgreSQL, banking API, Rinha de Backend, performance, systems programming, Cargo, async" />
     <link rel="canonical" href="https://jonathanperis.github.io/rinha2-back-end-rust/" />
