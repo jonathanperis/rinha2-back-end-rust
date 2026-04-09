@@ -1,0 +1,37 @@
+---
+---
+
+<section id="ci-cd-pipeline" class="doc-section">
+  <h1 class="page-title">CI/CD Pipeline</h1>
+
+  <h2>Workflows</h2>
+  <p>This repository uses four GitHub Actions workflows:</p>
+
+  <h3>build-check.yml</h3>
+  <ul>
+    <li><strong>Trigger:</strong> Pull requests to main</li>
+    <li><strong>Steps:</strong> Builds the Rust release binary, then runs Docker Compose and validates the healthcheck endpoint</li>
+    <li><strong>Purpose:</strong> Catch build failures and regressions before merging</li>
+  </ul>
+
+  <h3>main-release.yml</h3>
+  <ul>
+    <li><strong>Trigger:</strong> Push to main branch</li>
+    <li><strong>Steps:</strong> Builds the release binary, builds and pushes a multi-platform Docker image (amd64/arm64) to GHCR, runs container healthcheck, then runs k6 load tests and uploads the stress test report as an artifact</li>
+    <li><strong>Purpose:</strong> Automated release of production-ready container images with load test validation</li>
+  </ul>
+
+  <h3>codeql.yml</h3>
+  <ul>
+    <li><strong>Trigger:</strong> Push to main, pull requests to main, weekly schedule (Mondays)</li>
+    <li><strong>Steps:</strong> Runs CodeQL static analysis for Rust with security-and-quality queries</li>
+    <li><strong>Purpose:</strong> Continuous security and code quality analysis</li>
+  </ul>
+
+  <h3>deploy.yml</h3>
+  <ul>
+    <li><strong>Trigger:</strong> Push to main branch</li>
+    <li><strong>Steps:</strong> Installs dependencies, builds the Astro site in <code>docs/</code>, and deploys the output to GitHub Pages</li>
+    <li><strong>Purpose:</strong> Publish project documentation and stress test reports to GitHub Pages</li>
+  </ul>
+</section>

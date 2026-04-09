@@ -1,43 +1,61 @@
-# Astro Starter Kit: Minimal
+# rinha2-back-end-rust — GitHub Pages
+
+Astro 5 static site for the [rinha2-back-end-rust](https://github.com/jonathanperis/rinha2-back-end-rust) project. Deployed to GitHub Pages at [jonathanperis.github.io/rinha2-back-end-rust](https://jonathanperis.github.io/rinha2-back-end-rust/).
+
+## Stack
+
+| Technology | Purpose |
+|---|---|
+| Astro 5 | Static site generator |
+| React 19 | Interactive islands (docs sidebar, search, scrollspy) |
+| Tailwind CSS v4 | Utility-first styling for docs components |
+| `@astrojs/sitemap` | Auto-generated sitemap |
+
+## Structure
+
+```
+docs/
+├── public/
+│   ├── images/          # Grafana/Gatling metric screenshots
+│   └── reports/         # k6 stress test HTML reports (appended by CI)
+└── src/
+    ├── components/
+    │   ├── home/        # Landing page components (Navbar, Hero, Dashboard, Footer)
+    │   └── docs/        # Docs page components (DocPageIsland, Sidebar, sections/)
+    ├── hooks/
+    │   └── useScrollspy.ts
+    ├── layouts/
+    │   └── BaseLayout.astro
+    ├── pages/
+    │   ├── index.astro  # Landing page
+    │   └── docs.astro   # Documentation page
+    └── styles/
+        └── globals.css
+```
+
+## Commands
+
+Run from this directory (`docs/`):
+
+| Command | Action |
+|---|---|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start dev server at `localhost:4321` |
+| `npm run build` | Build to `./out/` |
+| `npm run preview` | Preview the production build locally |
+
+## Environment
+
+Copy `.env.example` to `.env` and fill in your values:
 
 ```sh
-npm create astro@latest -- --template minimal
+cp .env.example .env
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+| Variable | Description |
+|---|---|
+| `PUBLIC_GA_ID` | Google Analytics 4 Measurement ID |
 
-## 🚀 Project Structure
+## Deployment
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Deployed automatically on every push to `main` via `.github/workflows/deploy.yml`. The `PUBLIC_GA_ID` secret must be set in the repository's GitHub Actions secrets.

@@ -1,4 +1,7 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
+
 interface Stat {
   value: string;
   label: string;
@@ -32,17 +35,28 @@ const stressTestMetrics = [
   { value: '99.9%', label: 'Success Rate' }
 ];
 
-// Most recent stress test reports
-const stressTestReports = [
-  { date: '2026-04-01', time: '08:27', file: 'stress-test-report-20260401082755.html' },
-  { date: '2026-04-01', time: '07:58', file: 'stress-test-report-20260401075849.html' },
-  { date: '2026-04-01', time: '06:57', file: 'stress-test-report-20260401065717.html' },
-  { date: '2026-04-01', time: '05:33', file: 'stress-test-report-20260401053336.html' },
-  { date: '2026-04-01', time: '05:30', file: 'stress-test-report-20260401053021.html' },
-  { date: '2026-03-31', time: '15:59', file: 'stress-test-report-20260331155901.html' },
-  { date: '2026-03-31', time: '15:49', file: 'stress-test-report-20260331154944.html' },
-  { date: '2026-03-31', time: '15:44', file: 'stress-test-report-20260331154404.html' },
-];
+// Dynamically read all stress test reports from public/reports/
+const reportsDir = path.join(process.cwd(), 'public/reports');
+const allReports = fs.readdirSync(reportsDir)
+  .filter(f => f.endsWith('.html'))
+  .sort()
+  .reverse();
+
+// Parse date/time from filename: stress-test-report-YYYYMMDDHHMMSS.html
+function parseReportMeta(filename: string) {
+  const match = filename.match(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
+  if (!match) return { date: filename, time: '' };
+  const [, year, month, day, hour, minute] = match;
+  return {
+    date: `${year}-${month}-${day}`,
+    time: `${hour}:${minute}`,
+  };
+}
+
+const recentReports = allReports.slice(0, 8).map(file => ({
+  file,
+  ...parseReportMeta(file),
+}));
 ---
 
 <section class="dashboard">
@@ -93,13 +107,13 @@ const stressTestReports = [
   <div class="reports-section">
     <h4>📈 Historical Reports</h4>
     <div class="reports-grid">
-      {stressTestReports.map(report => (
+      {recentReports.map(report => (
         <a href={`./reports/${report.file}`} class="report-link">
           <span class="report-date">{report.date}</span>
           <span class="report-time">{report.time}</span>
         </a>
       ))}
     </div>
-    <p class="reports-note">30+ stress test runs archived • <a href="./reports/">View all reports →</a></p>
+    <p class="reports-note">{allReports.length} stress test runs archived • <a href="./reports/">View all reports →</a></p>
   </div>
 </section>
