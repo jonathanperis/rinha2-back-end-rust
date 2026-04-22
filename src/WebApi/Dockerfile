@@ -1,4 +1,4 @@
-FROM rust:1.94 AS builder
+FROM rust:1.95 AS builder
 
 # Enable SQLx offline mode so SQLx uses the offline cache.
 ENV SQLX_OFFLINE=1
