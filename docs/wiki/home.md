@@ -6,11 +6,11 @@ Rust/Actix-web 4 implementation for the Rinha de Backend 2024/Q1 challenge. Mana
 
 | Page | Description |
 |------|-------------|
-| [Challenge](Challenge) | What is Rinha de Backend 2024/Q1 |
-| [Architecture](Architecture) | Stack, services, resource constraints |
-| [Getting StartedL(Getting-Started.md) | Prerequisites and how to run |
-| [Performance](Performance) | Results, benchmarks, resource usage |
-| [CI/CD PipelineL(CI-CD-Pipeline.md) | GitHub Actions workflows |
+| [Challenge](#challenge) | What is Rinha de Backend 2024/Q1 |
+| [Architecture](#architecture) | Stack, services, resource constraints |
+| [Getting Started](#getting-started) | Prerequisites and how to run |
+| [Performance](#performance) | Results, benchmarks, resource usage |
+| [CI/CD Pipeline](#ci-cd-pipeline) | GitHub Actions workflows |
 
 ## Key Features
 
@@ -21,4 +21,4 @@ Rust/Actix-web 4 implementation for the Rinha de Backend 2024/Q1 challenge. Mana
 
 ---
 
-*[GitHubL(https://github.com/jonathanperis/rinha2-back-end-rust.md) · [Jonathan Peris](https://jonathanperis.github.io/)*
+*[GitHub](https://github.com/jonathanperis/rinha2-back-end-rust) · [Jonathan Peris](https://jonathanperis.github.io/)*
