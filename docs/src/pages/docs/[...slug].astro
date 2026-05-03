@@ -2,7 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/docs.css';
 
-const ORDER = ['home', 'challenge', 'architecture', 'getting-started', 'performance', 'ci-cd-pipeline'];
+const SECTION_CATEGORIES = [
+  { label: '', ids: ['home'] },
+  { label: 'Overview', ids: ['challenge', 'architecture'] },
+  { label: 'Develop', ids: ['getting-started', 'performance', 'ci-cd-pipeline'] },
+];
+
+const SECTION_ORDER = SECTION_CATEGORIES.flatMap(({ ids }) => ids);
 
 const SLUG_LABEL: Record<string, string> = {
   home: 'Home',
@@ -13,27 +19,44 @@ const SLUG_LABEL: Record<string, string> = {
   'ci-cd-pipeline': 'CI/CD Pipeline',
 };
 
-const SECTION_CATEGORIES = [
-  { label: '', ids: ['home'] },
-  { label: 'Overview', ids: ['challenge', 'architecture'] },
-  { label: 'Develop', ids: ['getting-started', 'performance', 'ci-cd-pipeline'] },
-];
-
 const wikiPages = import.meta.glob('../../../wiki/*.md', { eager: true });
 
-const isRoot = Astro.params.slug === undefined;
+const pagesBySlug: Record<string, any> = {};
+for (const [path, module] of Object.entries(wikiPages)) {
+  const fileName = path.split('/').pop()!.replace('.md', '');
+  pagesBySlug[fileName] = module;
+}
 
+// Build-time assertion: validate SECTION_CATEGORIES IDs against discovered slugs
+const availableSlugs = new Set(Object.keys(pagesBySlug));
+for (const cat of SECTION_CATEGORIES) {
+  for (const id of cat.ids) {
+    if (!availableSlugs.has(id)) {
+      const catName = cat.label || 'root';
+      throw new Error(
+        `SECTION_CATEGORIES references id "${id}" (category: "${catName}") but no matching wiki/${id}.md was found. Available slugs: ${Array.from(availableSlugs).join(', ')}`
+      );
+    }
+  }
+}
+
+const isRoot = Astro.params.slug === undefined;
 const requestedSlug = Astro.params.slug as string | undefined;
 
 const sectionsToRender = isRoot
-  ? ORDER
-  : ORDER.filter((slug) => slug === requestedSlug);
+  ? SECTION_ORDER
+      .map(slug => ({ slug, page: pagesBySlug[slug] }))
+      .filter(s => s.page)
+  : (() => {
+      const page = pagesBySlug[requestedSlug as string];
+      if (!page) return [];
+      return [{ slug: requestedSlug!, page }];
+    })();
 
 export function getStaticPaths() {
-  const ORDER = ['home', 'challenge', 'architecture', 'getting-started', 'performance', 'ci-cd-pipeline'];
   return [
     { params: { slug: undefined } },
-    ...ORDER.map((slug) => ({ params: { slug } })),
+    ...SECTION_ORDER.filter(s => s !== 'home').map(slug => ({ params: { slug } })),
   ];
 }
 
@@ -109,10 +132,7 @@ const docsBase = Astro.site
 
     <div class="content-wrapper">
       <main class="content" id="mainContent">
-        {sectionsToRender.map((slug) => {
-          const fileName = `${slug}.md`;
-          const wikiPage = wikiPages[`../../../wiki/${fileName}`];
-          if (!wikiPage) return null;
+        {sectionsToRender.map(({ slug, page: wikiPage }) => {
           const Content = (wikiPage as any).default ?? wikiPage;
           return (
             <section id={slug} class="doc-section">
@@ -225,6 +245,18 @@ const docsBase = Astro.site
             }
             group.style.display = visibleCount === 0 ? 'none' : '';
           });
+          /* Reset on clear */
+          if (!q) {
+            navItems.forEach(function (item) {
+              item.style.display = '';
+              if (item.parentElement) item.parentElement.style.display = '';
+            });
+            categoryGroups.forEach(function (group) {
+              group.style.display = '';
+              var catLabel = group.querySelector('.sidebar-category');
+              if (catLabel) catLabel.style.display = '';
+            });
+          }
         });
       }
     });
