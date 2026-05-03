@@ -124,6 +124,8 @@ const docsBase = Astro.site
     </div>
   </div>
 
+  {requestedSlug && <script is:inline define:vars={{ slug: requestedSlug, isRoot: isRoot }}>window.__docsSlug = slug; window.__isRoot = isRoot;</script>}
+
   <script is:inline define:vars={{ isRoot, docsBase }}>
     document.addEventListener('DOMContentLoaded', function () {
       const sections = document.querySelectorAll('section.doc-section');
@@ -132,6 +134,7 @@ const docsBase = Astro.site
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('overlay');
       const searchBox = document.getElementById('searchBox');
+      const isRoot = window.__isRoot !== false;
       const prefersReducedMotion = !window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
 
       /* Mobile menu toggle */
@@ -147,30 +150,35 @@ const docsBase = Astro.site
           menuToggle.setAttribute('aria-expanded', String(isOpen));
         });
         overlay.addEventListener('click', closeMenu);
-        navItems.forEach(function (item) {
-          item.addEventListener('click', closeMenu);
-        });
       }
 
-      /* Auto-scroll to hash section (root only) */
-      if (isRoot && window.location.hash) {
-        const targetId = window.location.hash.slice(1);
-        const target = document.getElementById(targetId);
-        if (target) {
-          setTimeout(function () {
-            target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-          }, 100);
+      /* Auto-scroll to section (root only) */
+      if (isRoot) {
+        const targetSlug = window.__docsSlug;
+        const hash = window.location.hash;
+        const sectionId = targetSlug || (hash && hash.length > 1 ? hash.slice(1) : null);
+        if (sectionId) {
+          const target = document.getElementById(sectionId);
+          if (target) {
+            setTimeout(function () {
+              target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+            }, 100);
+          }
         }
       }
 
-      /* Scrollspy (root + multi-section only) */
+      /* Scrollspy + nav click (root + multi-section only) */
       if (isRoot && sections.length > 1) {
         const observer = new IntersectionObserver(
           function (entries) {
             entries.forEach(function (entry) {
               if (entry.isIntersecting) {
                 navItems.forEach(function (item) {
-                  item.classList.toggle('active', item.getAttribute('data-nav-id') === entry.target.id);
+                  var isActive = item.getAttribute('data-nav-id') === entry.target.id;
+                  item.classList.toggle('active', isActive);
+                  if (isActive) {
+                    item.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
+                  }
                 });
               }
             });
@@ -178,6 +186,16 @@ const docsBase = Astro.site
           { root: null, rootMargin: '-80px 0px -60% 0px', threshold: 0 }
         );
         sections.forEach(function (section) { observer.observe(section); });
+
+        navItems.forEach(function (item) {
+          item.addEventListener('click', function () {
+            if (window.innerWidth <= 768 && menuToggle && sidebar && overlay) {
+              sidebar.classList.remove('open');
+              overlay.classList.remove('open');
+              menuToggle.setAttribute('aria-expanded', 'false');
+            }
+          });
+        });
       }
 
       /* Search filter (root only) */

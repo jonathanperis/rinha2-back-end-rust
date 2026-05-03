@@ -353,6 +353,49 @@
   z-index: 95;
 }
 
+/* ── Scroll behavior / reduced motion ──────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/* ── Custom scrollbar ─────────────────────────────────────────────── */
+html {
+  scrollbar-color: var(--rust-orange) var(--bg-deep);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+  border-left: 1px solid rgba(45, 26, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rust-orange);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #DEA584;
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--bg-deep);
+}
+
 /* ── Scrollbar (docs sidebar) ──────────────────────────────────────── */
 .docs-layout .sidebar::-webkit-scrollbar {
   width: 4px;
