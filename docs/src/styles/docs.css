@@ -97,10 +97,15 @@
 .docs-layout .sidebar-nav-container li { margin-bottom: 2px; }
 
 .docs-layout .sidebar-category-group {
+  display: block;
   margin-bottom: 8px;
 }
 .docs-layout .sidebar-category-group ul {
+  display: block;
   margin-top: 4px;
+}
+.docs-layout .sidebar-category-group li {
+  display: block;
 }
 
 .docs-layout .sidebar-category {
