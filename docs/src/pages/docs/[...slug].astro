@@ -126,7 +126,6 @@ const docsBase = Astro.site
 
   <script is:inline define:vars={{ isRoot, docsBase }}>
     document.addEventListener('DOMContentLoaded', function () {
-      const isRoot = window.__isRoot;
       const sections = document.querySelectorAll('section.doc-section');
       const navItems = document.querySelectorAll('.nav-item');
       const menuToggle = document.getElementById('menuToggle');
@@ -137,15 +136,19 @@ const docsBase = Astro.site
 
       /* Mobile menu toggle */
       if (menuToggle && sidebar && overlay) {
+        function closeMenu() {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('open');
+          menuToggle.setAttribute('aria-expanded', 'false');
+        }
         menuToggle.addEventListener('click', function () {
           const isOpen = sidebar.classList.toggle('open');
           overlay.classList.toggle('open', isOpen);
           menuToggle.setAttribute('aria-expanded', String(isOpen));
         });
-        overlay.addEventListener('click', function () {
-          sidebar.classList.remove('open');
-          overlay.classList.remove('open');
-          menuToggle.setAttribute('aria-expanded', 'false');
+        overlay.addEventListener('click', closeMenu);
+        navItems.forEach(function (item) {
+          item.addEventListener('click', closeMenu);
         });
       }
 
@@ -207,8 +210,5 @@ const docsBase = Astro.site
         });
       }
     });
-  </script>
-  <script is:inline define:vars={{ isRoot: isRoot }}>
-    window.__isRoot = isRoot;
   </script>
 </BaseLayout>

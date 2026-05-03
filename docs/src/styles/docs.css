@@ -260,6 +260,15 @@
   border: 1px solid var(--rust-dark);
 }
 
+@media (max-width: 768px) {
+  .docs-layout .doc-section table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
 .docs-layout .doc-section th,
 .docs-layout .doc-section td {
   padding: 10px 16px;
