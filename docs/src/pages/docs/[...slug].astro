@@ -1,0 +1,214 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/docs.css';
+
+const ORDER = ['home', 'challenge', 'architecture', 'getting-started', 'performance', 'ci-cd-pipeline'];
+
+const SLUG_LABEL: Record<string, string> = {
+  home: 'Home',
+  challenge: 'Challenge',
+  architecture: 'Architecture',
+  'getting-started': 'Getting Started',
+  performance: 'Performance',
+  'ci-cd-pipeline': 'CI/CD Pipeline',
+};
+
+const SECTION_CATEGORIES = [
+  { label: '', ids: ['home'] },
+  { label: 'Overview', ids: ['challenge', 'architecture'] },
+  { label: 'Develop', ids: ['getting-started', 'performance', 'ci-cd-pipeline'] },
+];
+
+const wikiPages = import.meta.glob('../../../wiki/*.md', { eager: true });
+
+const isRoot = Astro.params.slug === undefined;
+
+const requestedSlug = Astro.params.slug as string | undefined;
+
+const sectionsToRender = isRoot
+  ? ORDER
+  : ORDER.filter((slug) => slug === requestedSlug);
+
+export function getStaticPaths() {
+  const ORDER = ['home', 'challenge', 'architecture', 'getting-started', 'performance', 'ci-cd-pipeline'];
+  return [
+    { params: { slug: undefined } },
+    ...ORDER.map((slug) => ({ params: { slug } })),
+  ];
+}
+
+const title = isRoot
+  ? 'rinha2-back-end-rust | Documentation'
+  : `rinha2-back-end-rust | ${SLUG_LABEL[requestedSlug ?? ''] ?? 'Documentation'}`;
+const description = 'Documentation for the Rust/Actix-web 4 implementation of the Rinha de Backend 2024/Q1 challenge.';
+
+const docsBase = Astro.site
+  ? new URL(Astro.url.pathname.replace(/\/docs\/.*/, '/docs/'), Astro.site).href.replace(/\/$/, '')
+  : Astro.url.pathname.replace(/\/docs\/.*/, '/docs/').replace(/\/$/, '');
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="docs-layout">
+    <div class="mobile-header">
+      <button
+        class="menu-toggle"
+        id="menuToggle"
+        aria-label="Toggle Menu"
+        aria-controls="sidebar"
+        aria-expanded="false"
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <div class="repo-title">rinha2-back-end-rust</div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="repo-title">rinha2-back-end-rust</div>
+        <p class="repo-description">Rust/Actix-web 4 banking API under strict resource constraints.</p>
+        <input
+          type="text"
+          class="search-box"
+          id="searchBox"
+          placeholder="Search docs..."
+          autocomplete="off"
+          hidden={!isRoot}
+        />
+      </div>
+
+      <nav class="sidebar-nav-container">
+        {SECTION_CATEGORIES.map((cat) => {
+          const catIds = cat.ids;
+          return (
+            <div class="sidebar-category-group" data-category>
+              {cat.label && <div class="sidebar-category">{cat.label}</div>}
+              <ul>
+                {catIds.map((id) => (
+                  <li>
+                    <a
+                      class="nav-item"
+                      href={`${docsBase}/#${id}`}
+                      data-nav-id={id}
+                    >
+                      {SLUG_LABEL[id]}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="/">← Back to Home</a>
+        <a href="https://github.com/jonathanperis/rinha2-back-end-rust" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </aside>
+
+    <div class="content-wrapper">
+      <main class="content" id="mainContent">
+        {sectionsToRender.map((slug) => {
+          const fileName = `${slug}.md`;
+          const wikiPage = wikiPages[`../../../wiki/${fileName}`];
+          if (!wikiPage) return null;
+          const Content = (wikiPage as any).default ?? wikiPage;
+          return (
+            <section id={slug} class="doc-section">
+              <Content />
+            </section>
+          );
+        })}
+      </main>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ isRoot, docsBase }}>
+    document.addEventListener('DOMContentLoaded', function () {
+      const isRoot = window.__isRoot;
+      const sections = document.querySelectorAll('section.doc-section');
+      const navItems = document.querySelectorAll('.nav-item');
+      const menuToggle = document.getElementById('menuToggle');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      const searchBox = document.getElementById('searchBox');
+      const prefersReducedMotion = !window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+
+      /* Mobile menu toggle */
+      if (menuToggle && sidebar && overlay) {
+        menuToggle.addEventListener('click', function () {
+          const isOpen = sidebar.classList.toggle('open');
+          overlay.classList.toggle('open', isOpen);
+          menuToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+        overlay.addEventListener('click', function () {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('open');
+          menuToggle.setAttribute('aria-expanded', 'false');
+        });
+      }
+
+      /* Auto-scroll to hash section (root only) */
+      if (isRoot && window.location.hash) {
+        const targetId = window.location.hash.slice(1);
+        const target = document.getElementById(targetId);
+        if (target) {
+          setTimeout(function () {
+            target.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+          }, 100);
+        }
+      }
+
+      /* Scrollspy (root + multi-section only) */
+      if (isRoot && sections.length > 1) {
+        const observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                navItems.forEach(function (item) {
+                  item.classList.toggle('active', item.getAttribute('data-nav-id') === entry.target.id);
+                });
+              }
+            });
+          },
+          { root: null, rootMargin: '-80px 0px -60% 0px', threshold: 0 }
+        );
+        sections.forEach(function (section) { observer.observe(section); });
+      }
+
+      /* Search filter (root only) */
+      if (isRoot && searchBox) {
+        searchBox.addEventListener('input', function () {
+          var q = searchBox.value.toLowerCase();
+          sections.forEach(function (section) {
+            var text = section.textContent?.toLowerCase() ?? '';
+            var visible = !q || text.includes(q);
+            section.classList.toggle('hidden-section', !visible);
+          });
+          /* Also hide/show nav items and empty categories */
+          var categoryGroups = document.querySelectorAll('.sidebar-category-group');
+          categoryGroups.forEach(function (group) {
+            var navItemsInGroup = group.querySelectorAll('.nav-item');
+            var visibleCount = 0;
+            navItemsInGroup.forEach(function (item) {
+              var id = item.getAttribute('data-nav-id');
+              var sectionEl = document.getElementById(id ?? '');
+              var itemVisible = !q || (sectionEl && !sectionEl.classList.contains('hidden-section'));
+              item.style.display = itemVisible ? '' : 'none';
+              if (itemVisible) visibleCount++;
+            });
+            var catLabel = group.querySelector('.sidebar-category');
+            if (catLabel) {
+              catLabel.style.display = visibleCount === 0 ? 'none' : '';
+            }
+            group.style.display = visibleCount === 0 ? 'none' : '';
+          });
+        });
+      }
+    });
+  </script>
+  <script is:inline define:vars={{ isRoot: isRoot }}>
+    window.__isRoot = isRoot;
+  </script>
+</BaseLayout>
