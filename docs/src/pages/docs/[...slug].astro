@@ -93,7 +93,7 @@ const docsBase = Astro.site
         />
       </div>
 
-      <nav class="sidebar-nav-container">
+      <div class="sidebar-nav-container">
         {SECTION_CATEGORIES.map((cat) => {
           const catIds = cat.ids;
           return (
@@ -115,7 +115,7 @@ const docsBase = Astro.site
             </div>
           );
         })}
-      </nav>
+      </div>
 
       <div class="sidebar-footer">
         <a href="/">← Back to Home</a>
