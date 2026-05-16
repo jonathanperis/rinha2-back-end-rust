@@ -2,118 +2,158 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-interface Stat {
-  value: string;
+interface Constraint {
   label: string;
+  cpu: string;
+  memory: string;
+  cpuShare: number;
+  memoryShare: number;
 }
 
-interface ArchCard {
-  title: string;
-  description: string;
-}
-
-const stats: Stat[] = [
-  { value: '47k+', label: 'Target Requests' },
-  { value: '1.5', label: 'Max CPU Limit' },
-  { value: '550MB', label: 'Max RAM Limit' }
+const constraints: Constraint[] = [
+  { label: 'NGINX', cpu: '0.2 CPU', memory: '20MB', cpuShare: 13, memoryShare: 4 },
+  { label: 'API 1', cpu: '0.4 CPU', memory: '100MB', cpuShare: 27, memoryShare: 18 },
+  { label: 'API 2', cpu: '0.4 CPU', memory: '100MB', cpuShare: 27, memoryShare: 18 },
+  { label: 'PostgreSQL', cpu: '0.5 CPU', memory: '330MB', cpuShare: 33, memoryShare: 60 },
 ];
 
-const archCards: ArchCard[] = [
-  {
-    title: 'Architecture',
-    description: '2x API Instances, 1x Nginx LB, 1x Postgres Database.'
-  },
-  {
-    title: 'The Challenge',
-    description: 'Build a fictional bank API handling concurrent transactions with high throughput and data consistency.'
-  }
+const proofItems = [
+  { value: '~140', label: 'lines in main.rs', detail: 'single-file API surface' },
+  { value: 'SQLx', label: 'offline checked', detail: 'compile-time query cache' },
+  { value: 'UNLOGGED', label: 'tables', detail: 'write path tuned for throughput' },
+  { value: 'least_conn', label: 'NGINX', detail: 'balances both API workers' },
 ];
 
-const stressTestMetrics = [
-  { value: '46k+', label: 'Requests/Second' },
-  { value: '<50ms', label: 'P95 Latency' },
-  { value: '99.9%', label: 'Success Rate' }
-];
-
-// Dynamically read all stress test reports from public/reports/
 const reportsDir = path.join(process.cwd(), 'public/reports');
 const allReports = fs.readdirSync(reportsDir)
   .filter(f => f.endsWith('.html'))
   .sort()
   .reverse();
 
-// Parse date/time from filename: stress-test-report-YYYYMMDDHHMMSS.html
 function parseReportMeta(filename: string) {
   const match = filename.match(/(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
-  if (!match) return { date: filename, time: '' };
+  if (!match) return { date: filename, time: '', status: 'Archived' };
   const [, year, month, day, hour, minute] = match;
   return {
     date: `${year}-${month}-${day}`,
     time: `${hour}:${minute}`,
+    status: 'Archived',
   };
 }
 
-const recentReports = allReports.slice(0, 8).map(file => ({
+const recentReports = allReports.slice(0, 6).map((file, index) => ({
   file,
+  headline: index === 0 ? 'Latest' : 'k6 run',
+  metric: index === 0 ? '46k+ r/s' : 'report',
   ...parseReportMeta(file),
 }));
 ---
 
-<section class="dashboard">
-  <div class="stats-grid">
-    {stats.map(stat => (
-      <div class="stat-item">
-        <h3>{stat.value}</h3>
-        <p>{stat.label}</p>
-      </div>
-    ))}
+<section class="constraint-ledger" aria-labelledby="constraints-title">
+  <div class="section-heading">
+    <p class="eyebrow">Challenge budget</p>
+    <h2 id="constraints-title">1.5 CPU and 550MB RAM, fully accounted for.</h2>
+    <p>
+      The homepage now leads with the constraint that makes the implementation interesting:
+      every service earns its share of a tiny resource envelope.
+    </p>
   </div>
 
-  <div class="arch-info">
-    {archCards.map(card => (
-      <div class="arch-card">
-        <h4>{card.title}</h4>
-        <p>{card.description}</p>
-      </div>
+  <div class="meter-legend" aria-label="Meter legend">
+    <span><i class="legend-cpu"></i> CPU share</span>
+    <span><i class="legend-memory"></i> Memory share</span>
+  </div>
+
+  <div class="ledger-grid">
+    {constraints.map((item) => (
+      <article class="ledger-row" style={`--cpu:${item.cpuShare}; --memory:${item.memoryShare};`}>
+        <div class="ledger-label">
+          <strong>{item.label}</strong>
+          <span>{item.cpu} · {item.memory}</span>
+        </div>
+        <div class="meter-group" aria-hidden="true">
+          <span class="meter meter-cpu"><i></i></span>
+          <span class="meter meter-memory"><i></i></span>
+        </div>
+      </article>
     ))}
   </div>
 </section>
 
-<section class="stress-tests">
-  <h3>⚡ Stress Test Results</h3>
-  <p class="stress-intro">
-    Validated under extreme load conditions using k6. The system maintains stable performance 
-    even when processing thousands of concurrent banking transactions.
-  </p>
-  
-  <div class="stress-metrics">
-    {stressTestMetrics.map(metric => (
-      <div class="stress-metric">
-        <span class="metric-value">{metric.value}</span>
-        <span class="metric-label">{metric.label}</span>
-      </div>
-    ))}
-  </div>
-  
-  <div class="stress-links">
-    <a href="https://github.com/jonathanperis/rinha2-back-end-rust/actions/workflows/main-release.yml" class="stress-link" target="_blank" rel="noopener noreferrer">
-      <span>📊</span> View CI/CD Stress Tests
-    </a>
-    <a href="./docs/" class="stress-link">
-      <span>📖</span> Documentation
-    </a>
+<section class="architecture-rig" aria-labelledby="architecture-title">
+  <div class="section-heading compact">
+    <p class="eyebrow">Runtime topology</p>
+    <h2 id="architecture-title">NGINX feeds two Rust workers. Postgres owns the transaction law.</h2>
   </div>
 
-  <div class="reports-section">
-    <h4>📈 Historical Reports</h4>
-    <div class="reports-grid">
-      {recentReports.map(report => (
-        <a href={`./reports/${report.file}`} class="report-link">
-          <span class="report-date">{report.date}</span>
-          <span class="report-time">{report.time}</span>
-        </a>
-      ))}
+  <div class="rig-diagram" role="img" aria-label="NGINX on port 9999 routes to two Actix API instances on port 8080. Both API instances call PostgreSQL stored procedures for balance updates and statements.">
+    <div class="node node-lb">
+      <span>NGINX</span>
+      <strong>:9999</strong>
+      <small>least_conn</small>
     </div>
-    <p class="reports-note">{allReports.length} stress test runs archived • <a href="./reports/">View all reports →</a></p>
+    <div class="rails" aria-hidden="true"><span></span><span></span></div>
+    <div class="worker-stack">
+      <div class="node node-api">
+        <span>webapi1-rust</span>
+        <strong>:8080</strong>
+        <small>0.4 CPU · 100MB</small>
+      </div>
+      <div class="node node-api">
+        <span>webapi2-rust</span>
+        <strong>:8080</strong>
+        <small>0.4 CPU · 100MB</small>
+      </div>
+    </div>
+    <div class="rails rails-db" aria-hidden="true"><span></span><span></span></div>
+    <div class="node node-db">
+      <span>PostgreSQL</span>
+      <strong>stored procedures</strong>
+      <small>InsertTransacao() · GetSaldoClienteById()</small>
+    </div>
+  </div>
+</section>
+
+<section class="proof-strip" aria-labelledby="proof-title">
+  <div class="section-heading compact">
+    <p class="eyebrow">Implementation proof</p>
+    <h2 id="proof-title">Small surface, hard edges, measurable behavior.</h2>
+  </div>
+
+  <div class="proof-grid">
+    {proofItems.map((item) => (
+      <article class="proof-card">
+        <strong>{item.value}</strong>
+        <span>{item.label}</span>
+        <p>{item.detail}</p>
+      </article>
+    ))}
+  </div>
+</section>
+
+<section class="stress-tests" aria-labelledby="stress-title">
+  <div class="section-heading">
+    <p class="eyebrow">Evidence archive</p>
+    <h2 id="stress-title">Stress reports stay inspectable.</h2>
+    <p>
+      The archive is treated like audit material: latest run first, every artifact linked,
+      and the CI workflow one step away.
+    </p>
+  </div>
+
+  <div class="report-table" role="list" aria-label="Recent stress test reports">
+    {recentReports.map((report) => (
+      <a href={`./reports/${report.file}`} class="report-row" role="listitem">
+        <span class="report-status">{report.headline}</span>
+        <span class="report-date">{report.date}</span>
+        <span class="report-time">{report.time}</span>
+        <span class="report-metric">{report.metric}</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="archive-actions">
+    <a href="https://github.com/jonathanperis/rinha2-back-end-rust/actions/workflows/main-release.yml" class="stress-link">View CI stress workflow</a>
+    <a href="./reports/" class="stress-link">View all {allReports.length} reports</a>
   </div>
 </section>

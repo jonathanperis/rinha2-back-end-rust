@@ -17,7 +17,7 @@ const pageUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : `htt
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareSourceCode',
-  'name': 'Rinha de Backend — Rust',
+  'name': 'Rinha de Backend Rust',
   'description': description,
   'url': pageUrl,
   'codeRepository': 'https://github.com/jonathanperis/rinha2-back-end-rust',
@@ -35,10 +35,10 @@ const jsonLd = {
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <meta name="description" content={description} />
     <meta name="keywords" content="Rust, Actix-web, SQLx, PostgreSQL, banking API, Rinha de Backend, performance, systems programming, Cargo, async" />
     <link rel="canonical" href={pageUrl} />
