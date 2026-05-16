@@ -1,22 +1,51 @@
 ---
 ---
 
-<section class="hero">
-  <h1>Blazingly Fast.<br><span>Eventually Compiled.</span></h1>
-  <p class="tagline">
-    Industrial-grade Rust implementation of the Rinha de Backend 2024/Q1 challenge. 
-    Safe, concurrent, and blisteringly fast under extreme resource constraints.
-  </p>
-  
-  <div class="badges">
-    <span class="badge">Rust</span>
-    <span class="badge">Tokio</span>
-    <span class="badge">Nginx</span>
-    <span class="badge">PostgreSQL</span>
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="eyebrow">Rinha de Backend 2024/Q1 · Rust execution lane</p>
+    <h1 id="hero-title">Blazingly fast.<br><span>Eventually compiled.</span></h1>
+    <p class="tagline">
+      A compact Rust banking API built for brutal limits: two Actix workers, one NGINX balancer,
+      PostgreSQL stored procedures, and a full k6 evidence trail.
+    </p>
+
+    <div class="badges" aria-label="Core stack">
+      <span class="badge">Rust 1.94</span>
+      <span class="badge">Actix-web 4</span>
+      <span class="badge">SQLx 0.8</span>
+      <span class="badge">PostgreSQL 16</span>
+    </div>
+
+    <div class="ctas" aria-label="Primary actions">
+      <a href="./docs/" class="btn btn-primary">Read architecture</a>
+      <a href="https://github.com/jonathanperis/rinha2-back-end-rust" class="btn btn-outline">Inspect source</a>
+    </div>
   </div>
 
-  <div class="ctas">
-    <a href="./docs/" class="btn btn-primary">View Documentation &rarr;</a>
-    <a href="https://github.com/jonathanperis/rinha2-back-end-rust" class="btn btn-outline">View on GitHub &rarr;</a>
-  </div>
+  <aside class="run-panel" aria-labelledby="latest-run-title">
+    <div class="panel-kicker">Latest verified run</div>
+    <h2 id="latest-run-title">46k+ requests/sec</h2>
+    <p>k6 stress validation from the GitHub Actions release pipeline.</p>
+
+    <dl class="run-facts">
+      <div>
+        <dt>P95 latency</dt>
+        <dd>&lt;50ms</dd>
+      </div>
+      <div>
+        <dt>Success rate</dt>
+        <dd>99.9%</dd>
+      </div>
+      <div>
+        <dt>Latest report</dt>
+        <dd>2026-04-01 08:27</dd>
+      </div>
+    </dl>
+
+    <div class="run-actions">
+      <a href="./reports/stress-test-report-20260401082755.html">Open latest report</a>
+      <a href="https://github.com/jonathanperis/rinha2-back-end-rust/actions/workflows/main-release.yml">View workflow</a>
+    </div>
+  </aside>
 </section>
