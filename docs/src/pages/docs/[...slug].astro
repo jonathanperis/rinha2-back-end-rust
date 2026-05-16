@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import '../../styles/docs.css';
-import { SECTION_CATEGORIES, SECTION_ORDER } from './sidebar.config';
+import { SECTION_CATEGORIES, SECTION_ORDER } from '../../lib/docs-sidebar.config';
 
 const SLUG_LABEL: Record<string, string> = {
   home: 'Home',
@@ -58,6 +58,7 @@ const title = isRoot
   : `rinha2-back-end-rust | ${SLUG_LABEL[requestedSlug ?? ''] ?? 'Documentation'}`;
 const description = 'Documentation for the Rust/Actix-web 4 implementation of the Rinha de Backend 2024/Q1 challenge.';
 
+const homeHref = import.meta.env.BASE_URL || '/';
 const docsBase = Astro.site
   ? new URL(Astro.url.pathname.replace(/\/docs\/.*/, '/docs/'), Astro.site).href.replace(/\/$/, '')
   : Astro.url.pathname.replace(/\/docs\/.*/, '/docs/').replace(/\/$/, '');
@@ -81,8 +82,13 @@ const docsBase = Astro.site
 
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <div class="repo-title">rinha2-back-end-rust</div>
-        <p class="repo-description">Rust/Actix-web 4 banking API under strict resource constraints.</p>
+        <a class="repo-mark" href={homeHref} aria-label="Back to homepage">
+          <span class="repo-sigil">R2</span>
+          <span>
+            <span class="repo-title">rinha2-back-end-rust</span>
+            <span class="repo-description">Rust/Actix-web 4 banking API under strict resource constraints.</span>
+          </span>
+        </a>
         <input
           type="text"
           class="search-box"
@@ -118,7 +124,7 @@ const docsBase = Astro.site
       </div>
 
       <div class="sidebar-footer">
-        <a href="/">← Back to Home</a>
+        <a class="back-home" href={homeHref}>← Main homepage</a>
         <a href="https://github.com/jonathanperis/rinha2-back-end-rust" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
     </aside>
