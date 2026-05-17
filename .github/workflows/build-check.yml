@@ -27,6 +27,9 @@ jobs:
       - name: Build the application
         run: cargo build --release --manifest-path ./src/WebApi/Cargo.toml
 
+      - name: Check README and wiki drift
+        run: python3 scripts/check_docs_drift.py
+
   container-test:
     runs-on: ubuntu-latest
     steps:
