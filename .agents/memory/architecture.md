@@ -6,7 +6,7 @@ type: project
 
 ## Design Decisions
 
-**Single-file API (~140 lines in main.rs):**
+**Single-file API (173 total lines in main.rs):**
 - All routes, DTOs, validation, and DB calls in one file
 - Intentionally minimal — the challenge rewards simplicity and performance, not abstractions
 

@@ -1,6 +1,8 @@
-# Rinha de Backend 2024/Q1 — Rust Implementation
+# Rinha de Backend 2024/Q1 — Rust Implementation Agent Guide
 
 High-performance banking API built with Rust/Actix-web for the Rinha de Backend challenge. Handles concurrent transactions under strict resource constraints (1.5 CPU, 550MB RAM).
+
+This repository uses the standardized `AGENTS.md` + `.agents/` agent-instrumentation layout. Do not recreate legacy tool-specific instruction files.
 
 ---
 
@@ -8,7 +10,7 @@ High-performance banking API built with Rust/Actix-web for the Rinha de Backend 
 
 | Technology | Purpose |
 |-----------|---------|
-| Rust 1.94 | Language |
+| Rust 1.95 builder / Cargo edition 2024 | Language |
 | Actix-web 4 | Async HTTP framework |
 | SQLx 0.8 | Compile-time checked PostgreSQL queries |
 | PostgreSQL 16.7 | Database with stored procedures |
@@ -40,7 +42,7 @@ NGINX (:9999, least_conn)
     └── GetSaldoClienteById() — statement with JSONB aggregation
 ```
 
-**Single-file API** (~140 lines in `src/WebApi/main.rs`). All business logic in PostgreSQL stored procedures.
+**Single-file API** (173 total lines in `src/WebApi/main.rs`). All business logic in PostgreSQL stored procedures.
 
 ---
 
@@ -80,9 +82,9 @@ NGINX (:9999, least_conn)
 ```
 rinha2-back-end-rust/
 ├── src/WebApi/
-│   ├── main.rs         # Complete API (~140 lines)
+│   ├── main.rs         # Complete API (173 total lines)
 │   ├── Cargo.toml      # Dependencies
-│   ├── Dockerfile       # Multi-stage: rust:1.94 → debian:bookworm-slim
+│   ├── Dockerfile       # Multi-stage: rust:1.95 → debian:bookworm-slim
 │   └── .sqlx/           # SQLx offline query cache
 ├── docker-entrypoint-initdb.d/
 │   └── rinha.dump.sql   # Schema + stored procedures + seed data
