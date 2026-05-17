@@ -1,23 +1,25 @@
 # rinha2-back-end-rust
 
-Rust/Actix-web 4 implementation for the Rinha de Backend 2024/Q1 challenge. Manages a fictional bank API with transaction processing and balance statements under strict resource constraints (1.5 CPU, 550MB RAM total across all containers).
+Rust/Actix-web 4 implementation for the Rinha de Backend 2024/Q1 challenge. It manages a fictional bank API with transaction processing and balance statements under strict resource constraints (1.5 CPU, 550MB RAM total across the challenge containers).
 
 ## Wiki Pages
 
 | Page | Description |
 |------|-------------|
-| [Challenge](#challenge) | What is Rinha de Backend 2024/Q1 |
-| [Architecture](#architecture) | Stack, services, resource constraints |
-| [Getting Started](#getting-started) | Prerequisites and how to run |
-| [Performance](#performance) | Results, benchmarks, resource usage |
-| [CI/CD Pipeline](#ci-cd-pipeline) | GitHub Actions workflows |
+| [Challenge](#challenge) | What Rinha de Backend 2024/Q1 requires |
+| [Architecture](#architecture) | Current stack, services, resource constraints, and runtime flow |
+| [Getting Started](#getting-started) | Prerequisites, run commands, endpoint smoke tests |
+| [Performance](#performance) | How to read benchmark/report artifacts without hard-coding stale numbers |
+| [CI/CD Pipeline](#ci-cd-pipeline) | GitHub Actions workflows and release/deploy path |
 
 ## Key Features
 
-- Minimal single-file API implementation (~140 lines of Rust)
+- Single Rust API entrypoint (`src/WebApi/main.rs`, 173 total lines at this revision)
 - Actix-web 4 with Tokio async runtime and SQLx 0.8
-- PostgreSQL stored procedures for server-side business logic
-- All requests under 800ms at 250MB RAM usage
+- Rust 2024 package; Docker builder currently uses `rust:1.95`
+- PostgreSQL stored procedures for balance updates and statement aggregation
+- Health endpoint at `/healthz` returns `Healthy`
+- Source-backed drift guard: `python3 scripts/check_docs_drift.py`
 
 ---
 
