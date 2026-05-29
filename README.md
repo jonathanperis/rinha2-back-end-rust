@@ -82,15 +82,28 @@ The dev compose file also exposes the API instances directly on `localhost:6968`
 | GET | `/clientes/{id}/extrato` | 200, 404 | Get account balance statement with the 10 most recent transactions |
 | GET | `/healthz` | 200 | Health check returning `Healthy` |
 
-Transaction payload validation is handled in Rust before the stored procedure call: `tipo` must be `c` or `d`, `descricao` must be non-empty and at most 10 characters, and `valor` must be positive.
+Transaction payload validation is handled in Rust before the stored procedure call: `tipo` must be `c` or `d`, `descricao` must be non-empty and at most 10 characters, and `valor` must be positive. The JSON input accepts the lowercase fields used by the challenge (`valor`, `tipo`, `descricao`) and PascalCase aliases (`Valor`, `Tipo`, `Descricao`) because the DTO includes Serde aliases.
+
+Current business-limit behavior is source-backed by `InsertTransacao`: if a debit would exceed the client's limit, PostgreSQL leaves the balance unchanged, does not insert a transaction row, and returns the current balance to the API. Therefore `422` is used for invalid payloads or SQL errors, while this over-limit path currently responds with `200` and the unchanged balance payload.
+
+Client limits are seeded in both the Rust `CLIENTS` map and the PostgreSQL dump:
+
+| Client ID | Limit |
+|-----------|-------|
+| 1 | 100000 |
+| 2 | 80000 |
+| 3 | 1000000 |
+| 4 | 10000000 |
+| 5 | 500000 |
 
 ### Run Stress Tests
 
 ```bash
+cp .env.example .env
 docker compose up k6 --build --force-recreate
 ```
 
-The dev compose path runs k6 in `MODE=dev` with InfluxDB/Grafana export. The production compose file used by the release workflow runs k6 in `MODE=prod` and exports an HTML report artifact.
+The dev compose path runs k6 in `MODE=dev` with InfluxDB/Grafana export, so `.env` must provide `INFLUXDB_PASSWORD` and `INFLUXDB_TOKEN` values for the local observability stack. The production compose file used by the release workflow runs k6 in `MODE=prod` and exports an HTML report artifact.
 
 ## Project Structure
 

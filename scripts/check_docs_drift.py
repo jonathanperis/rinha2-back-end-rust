@@ -72,11 +72,22 @@ require("Healthy" in DOC_TEXT, "health endpoint body is not documented")
 require("max_connections(5)" in main_rs, "SQLx pool size changed; update docs/checker")
 require("max_connections(5)" in DOC_TEXT or "pool size is 5" in DOC_TEXT, "SQLx pool size is not documented")
 
-# Payload validation facts mirrored from is_transacao_valid.
+# Payload validation facts mirrored from is_transacao_valid and DTO aliases.
 for snippet in ['tipo == "c" || tipo == "d"', 'descricao.len() <= 10', 'valor > 0']:
     require(snippet in main_rs, f"transaction validation changed around {snippet}; update docs/checker")
 for phrase in ["tipo", "descricao", "10", "valor"]:
     require(phrase in DOC_TEXT, f"transaction validation docs missing {phrase}")
+for alias in ['#[serde(alias = "Valor")]', '#[serde(alias = "Tipo")]', '#[serde(alias = "Descricao")]']:
+    require(alias in main_rs, f"transaction DTO alias changed around {alias}; update docs/checker")
+require("PascalCase aliases" in DOC_TEXT and "Valor" in DOC_TEXT and "Descricao" in DOC_TEXT, "transaction DTO aliases are not documented")
+
+# Seeded clients and current business-limit behavior.
+for client_id, limit in [(1, 100000), (2, 80000), (3, 1000000), (4, 10000000), (5, 500000)]:
+    require(f"m.insert({client_id}, {limit})" in main_rs, f"Rust CLIENTS map changed for client {client_id}; update docs/checker")
+    require(f"{client_id}\t{limit}\t0" in schema_sql, f"seed SQL changed for client {client_id}; update docs/checker")
+    require(str(limit) in DOC_TEXT, f"client limit {limit} is not documented")
+require("IF FOUND THEN" in schema_sql and "SELECT \"SaldoInicial\" INTO novo_saldo" in schema_sql, "over-limit stored procedure behavior changed; update docs/checker")
+require("unchanged balance" in DOC_TEXT and "200" in DOC_TEXT, "current over-limit response behavior is not documented")
 
 # Compose/runtime source-backed facts.
 for resource in ['cpus: "0.4"', 'memory: "100MB"', 'cpus: "0.5"', 'memory: "330MB"', 'cpus: "0.2"', 'memory: "20MB"']:
@@ -89,6 +100,10 @@ for flag in ["synchronous_commit=0", "fsync=0", "full_page_writes=0"]:
     require(flag in dev_compose and flag in prod_compose and flag in DOC_TEXT, f"PostgreSQL tuning flag {flag} drifted")
 require("CREATE UNLOGGED TABLE" in schema_sql and "UNLOGGED" in DOC_TEXT, "UNLOGGED table fact drifted")
 require("IX_Transacoes_ClienteId_Id_Desc" in schema_sql and "ClienteId, Id DESC" in DOC_TEXT, "transaction index fact drifted")
+for env_name in ["INFLUXDB_PASSWORD", "INFLUXDB_TOKEN"]:
+    require(env_name in dev_compose, f"dev compose env var changed/missing: {env_name}")
+    require(env_name in read(".env.example"), f".env.example missing {env_name}")
+    require(env_name in DOC_TEXT, f"local observability env var {env_name} is not documented")
 
 # Workflow facts.
 build_check = workflow_text("build-check.yml")
