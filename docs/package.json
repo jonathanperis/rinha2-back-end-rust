@@ -11,13 +11,18 @@
     "check:drift": "python3 ../scripts/check_docs_drift.py"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.2.1",
     "@astrojs/sitemap": "^3",
-    "astro": "^6"
+    "astro": "^6.4.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4",
     "eslint": "^9",
+    "eslint-plugin-astro": "^1.7.0",
+    "globals": "^17.6.0",
     "tailwindcss": "^4",
-    "typescript": "^6"
+    "typescript": "^6",
+    "typescript-eslint": "^8.60.0"
   }
 }
