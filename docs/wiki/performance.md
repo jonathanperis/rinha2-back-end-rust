@@ -27,6 +27,7 @@ Use those generated reports and workflow artifacts for exact latency, throughput
 - Client existence and limits are validated from a lazy static Rust `HashMap` for the five seeded clients.
 - Balance mutation and statement aggregation are handled in PostgreSQL stored procedures.
 - `Clientes` and `Transacoes` are UNLOGGED tables for challenge throughput.
+- Debits that would exceed a client's limit do not insert a transaction row; the stored procedure returns the unchanged balance.
 - PostgreSQL durability flags are disabled for benchmarking: `synchronous_commit=0`, `fsync=0`, and `full_page_writes=0`.
 
 ## Stress Testing

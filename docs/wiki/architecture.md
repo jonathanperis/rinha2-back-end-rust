@@ -26,7 +26,7 @@ NGINX listens on `:9999` and proxies all routes to an upstream named `api` with 
 The API is a single Rust entrypoint (`src/WebApi/main.rs`, 173 total lines at this revision):
 
 - `GET /clientes/{id}/extrato` validates the client ID against a lazy static `HashMap`, then calls `GetSaldoClienteById($1)`.
-- `POST /clientes/{id}/transacoes` validates the client ID and payload (`tipo`, `descricao`, `valor`), then calls `InsertTransacao($1, $2, $3, $4)`.
+- `POST /clientes/{id}/transacoes` validates the client ID and payload (`tipo`, `descricao`, `valor`), accepts PascalCase JSON aliases (`Valor`, `Tipo`, `Descricao`), then calls `InsertTransacao($1, $2, $3, $4)`.
 - `GET /healthz` returns `Healthy` for compose and CI smoke checks.
 - The SQLx pool is created from `DATABASE_URL` with `max_connections(5)` per API instance.
 
@@ -36,7 +36,7 @@ Business logic is implemented in PostgreSQL stored procedures over UNLOGGED tabl
 
 - `Clientes` stores the five seeded clients and their current balance (`SaldoInicial`).
 - `Transacoes` stores accepted transactions and has an index on `(ClienteId, Id DESC)` for recent-statement reads.
-- `InsertTransacao` applies credit/debit balance updates and inserts the transaction only when the update succeeds.
+- `InsertTransacao` applies credit/debit balance updates and inserts the transaction only when the update succeeds. If a debit exceeds the available limit, the function returns the unchanged current balance without inserting a transaction row; the Rust handler serializes that as a `200` response today.
 - `GetSaldoClienteById` returns the current balance, limit, timestamp, and up to 10 latest transactions as JSONB.
 
 The database command is tuned for benchmark throughput, not durability:

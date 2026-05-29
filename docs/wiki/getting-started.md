@@ -31,7 +31,33 @@ Use port `9999` for normal validation and load-test requests.
 | `/clientes/{id}/extrato` | GET | 200, 404 | Get current balance, credit limit, timestamp, and up to 10 recent transactions |
 | `/healthz` | GET | 200 | Health check returning `Healthy` |
 
-Transaction payloads must have `tipo` equal to `c` or `d`, a non-empty `descricao` of at most 10 characters, and a positive integer `valor`.
+Transaction payloads must have `tipo` equal to `c` or `d`, a non-empty `descricao` of at most 10 characters, and a positive integer `valor`. The DTO also accepts PascalCase aliases (`Valor`, `Tipo`, `Descricao`) in addition to the lowercase challenge field names (`valor`, `tipo`, `descricao`).
+
+### Current Response Contract
+
+`POST /clientes/{id}/transacoes` returns:
+
+```json
+{
+  "id": 1,
+  "limite": 100000,
+  "saldo": 1000
+}
+```
+
+`GET /clientes/{id}/extrato` returns a `saldo` object with `total`, `limite`, and `data_extrato`, plus `ultimas_transacoes` entries serialized as `valor`, `tipo`, and `descricao`.
+
+The current stored procedure handles a debit that would exceed the client limit by leaving the balance unchanged and skipping the transaction insert, then returning the current balance to the API. That path currently responds with `200`; `422` is reserved for invalid payloads or database errors.
+
+Seeded client limits:
+
+| ID | Limit |
+|----|-------|
+| 1 | 100000 |
+| 2 | 80000 |
+| 3 | 1000000 |
+| 4 | 10000000 |
+| 5 | 500000 |
 
 ## Example Requests
 
@@ -56,7 +82,8 @@ curl http://localhost:9999/clientes/1/extrato
 ## Stress Tests
 
 ```bash
+cp .env.example .env
 docker compose up k6 --build --force-recreate
 ```
 
-In `docker-compose.yml`, k6 runs in `MODE=dev` and exports time-series data to InfluxDB/Grafana. The release workflow uses `prod/docker-compose.yml`, where k6 runs in `MODE=prod` and writes an HTML stress-test report artifact.
+In `docker-compose.yml`, k6 runs in `MODE=dev` and exports time-series data to InfluxDB/Grafana. Copy `.env.example` first so `INFLUXDB_PASSWORD` and `INFLUXDB_TOKEN` are defined for InfluxDB, Grafana, and xk6 output. The release workflow uses `prod/docker-compose.yml`, where k6 runs in `MODE=prod` and writes an HTML stress-test report artifact.

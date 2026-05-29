@@ -6,6 +6,8 @@ Astro static site deployed to GitHub Pages.
 
 Run from this directory (`docs/`):
 
+This Astro 6 site is built with Bun, uses Sätteri via `@astrojs/markdown-satteri` as the Markdown processor, and should be run with Node 22.12+ available on `PATH` for local npm/preview workflows.
+
 | Command | Action |
 |---|---|
 | `bun install` | Install dependencies |
